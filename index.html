@@ -5,485 +5,501 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Mini Minecraft — Single HTML (Offline, Isometric 3D)</title>
 <style>
-  :root{--bg:#0b1220;--panel:#0f1724;--muted:#9fb6c9}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#07101a,#071823);color:#e6eef6}
-  #wrap{display:flex;height:100vh;gap:12px;padding:12px;box-sizing:border-box}
-  canvas{background:linear-gradient(#87ceeb,#cbefff);border-radius:6px;flex:1;display:block;box-shadow:0 6px 18px rgba(2,6,23,.7)}
-  #ui{width:340px;min-width:260px;background:var(--panel);border-radius:10px;padding:12px;box-shadow:0 6px 24px rgba(2,6,23,.6)}
-  h1{font-size:18px;margin:0 0 8px}
-  .palette{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-  .blockBtn{width:48px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;font-weight:700}
-  .blockBtn.sel{outline:3px solid rgba(125,211,252,.18);border-color:rgba(255,255,255,.06)}
-  .row{display:flex;gap:8px;align-items:center;margin:8px 0}
-  button,input,select,textarea{background:#08121b;color:#dff;border:1px solid rgba(255,255,255,.03);padding:8px;border-radius:8px;cursor:pointer}
-  .muted{color:var(--muted);font-size:13px}
-  .hint{font-size:13px;color:#9fb6c9;margin-top:6px}
-  .small{font-size:13px}
+  :root{--bg:#0b1220;--panel:#0f1724;--muted:#9fb6c9}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#07101a,#071823);color:#e6eef6}
+  #wrap{display:flex;height:100vh;gap:12px;padding:12px;box-sizing:border-box}
+  canvas{background:linear-gradient(#87ceeb,#cbefff);border-radius:6px;flex:1;display:block;box-shadow:0 6px 18px rgba(2,6,23,.7)}
+  #ui{width:340px;min-width:260px;background:var(--panel);border-radius:10px;padding:12px;box-shadow:0 6px 24px rgba(2,6,23,.6)}
+  h1{font-size:18px;margin:0 0 8px}
+  .palette{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .blockBtn{width:48px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid transparent;font-weight:700}
+  .blockBtn.sel{outline:3px solid rgba(125,211,252,.18);border-color:rgba(255,255,255,.06)}
+  .row{display:flex;gap:8px;align-items:center;margin:8px 0}
+  button,input,select,textarea{background:#08121b;color:#dff;border:1px solid rgba(255,255,255,.03);padding:8px;border-radius:8px;cursor:pointer}
+  .muted{color:var(--muted);font-size:13px}
+  .hint{font-size:13px;color:#9fb6c9;margin-top:6px}
+  .small{font-size:13px}
 </style>
 </head>
 <body>
 <div id="wrap">
-  <canvas id="c" tabindex="0"></canvas>
-  <div id="ui">
-    <h1>Mini Minecraft — Offline Isometric 3D</h1>
-    <div class="muted">Single HTML file. Double-click to open (works from file://). Drag to pan, scroll to zoom, left-click place, right-click remove, 1–6 change block.</div>
+  <canvas id="c" tabindex="0"></canvas>
+  <div id="ui">
+    <h1>Mini Minecraft — Offline Isometric 3D</h1>
+    <div class="muted">Single HTML file. Double-click to open (works from file://). Drag to pan, scroll to zoom, left-click place, right-click remove, 1–6 change block.</div>
 
-    <div style="margin-top:10px">
-      <div class="small">Block palette (1-6)</div>
-      <div class="palette" id="palette"></div>
-    </div>
+    <div style="margin-top:10px">
+      <div class="small">Block palette (1-6)</div>
+      <div class="palette" id="palette"></div>
+    </div>
 
-    <div class="row">
-      <button id="saveBtn">Save (S)</button>
-      <button id="loadBtn">Load (L)</button>
-      <button id="exportBtn">Export JSON</button>
-      <button id="importBtn">Import JSON</button>
-    </div>
+    <div class="row">
+      <button id="saveBtn">Save (S)</button>
+      <button id="loadBtn">Load (L)</button>
+      <button id="exportBtn">Export JSON</button>
+      <button id="importBtn">Import JSON</button>
+    </div>
 
-    <div class="row">
-      <label class="small">World size: <select id="sizeSelect"><option>32</option><option selected>48</option><option>64</option></select></label>
-      <label class="small">Height: <select id="heightSelect"><option>8</option><option selected>16</option><option>24</option></select></label>
-    </div>
+    <div class="row">
+      <label class="small">World size: <select id="sizeSelect"><option>32</option><option selected>48</option><option>64</option></select></label>
+      <label class="small">Height: <select id="heightSelect"><option>8</option><option selected>16</option><option>24</option></select></label>
+    </div>
 
-    <div style="margin-top:8px"><label class="small">Tip: Drag canvas to move camera. Mouse wheel to zoom. Click canvas to focus for keyboard shortcuts (S/L/1-6).</label></div>
+    <div style="margin-top:8px"><label class="small">Tip: Drag canvas to move camera. Mouse wheel to zoom. Click canvas to focus for keyboard shortcuts (S/L/1-6).</label></div>
 
-    <div style="margin-top:10px"><textarea id="importExport" placeholder='Exported JSON will appear here for import/export' style="width:100%;height:110px"></textarea></div>
+    <div style="margin-top:10px"><textarea id="importExport" placeholder='Exported JSON will appear here for import/export' style="width:100%;height:110px"></textarea></div>
 
-    <div style="margin-top:8px" class="small muted">Rendering: isometric voxel engine (2.5D). Fast on Chromebooks and offline.</div>
-  </div>
+    <div style="margin-top:8px" class="small muted">Rendering: isometric voxel engine (2.5D). Fast on Chromebooks and offline.</div>
+  </div>
 </div>
 
 <script>
 (() => {
-  // Canvas and device pixel ratio
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
-  function resizeCanvas(){
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.max(320, Math.floor((window.innerWidth - 340) * dpr));
-    canvas.height = Math.max(240, Math.floor(window.innerHeight * dpr));
-    canvas.style.width = (window.innerWidth - 340) + 'px';
-    canvas.style.height = window.innerHeight + 'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    draw();
-  }
-  window.addEventListener('resize', resizeCanvas);
-  // initialize size immediately
-  resizeCanvas();
+  // Canvas and device pixel ratio
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Adjusted width calculation to account for fixed UI width
+    canvas.width = Math.max(320, Math.floor((window.innerWidth - 364) * dpr));
+    canvas.height = Math.max(240, Math.floor(window.innerHeight * dpr));
+    canvas.style.width = (window.innerWidth - 364) + 'px';
+    canvas.style.height = window.innerHeight - 24 + 'px'; // -24 for padding
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+  window.addEventListener('resize', resizeCanvas);
+  // initialize size immediately
+  resizeCanvas();
 
-  // Controls state
-  let cam = {x: 24, y: 0, z: 24, zoom: 1.0, angle: Math.PI/6}; // y is camera height (not used for tilt in iso)
-  let dragging = false, lastMouse = null;
-  let hover = {tx: -1, ty: -1, tz: -1};
+  // Controls state
+  let cam = {x: 24, y: 0, z: 24, zoom: 1.0, angle: Math.PI/6}; // y is camera height (not used for tilt in iso)
+  let dragging = false, lastMouse = null;
+  let hover = {tx: -1, ty: -1, tz: -1};
 
-  // Default world size
-  let WORLD_W = 48, WORLD_D = 48, WORLD_H = 16;
-  const paletteEl = document.getElementById('palette');
+  // Default world size
+  let WORLD_W = 48, WORLD_D = 48, WORLD_H = 16;
+  const paletteEl = document.getElementById('palette');
 
-  // Block types: id, name, color(hex)
-  const BLOCKS = [
-    {id:0,name:'Air',color:null},
-    {id:1,name:'Grass',color:'#67b04e'},
-    {id:2,name:'Dirt',color:'#8a5a3b'},
-    {id:3,name:'Stone',color:'#8f918f'},
-    {id:4,name:'Wood',color:'#a46f32'},
-    {id:5,name:'Water',color:'#3aa0e3'},
-    {id:6,name:'Sand',color:'#e2d59f'}
-  ];
-  let selectedBlock = 1;
+  // Block types: id, name, color(hex)
+  const BLOCKS = [
+    {id:0,name:'Air',color:null},
+    {id:1,name:'Grass',color:'#67b04e'},
+    {id:2,name:'Dirt',color:'#8a5a3b'},
+    {id:3,name:'Stone',color:'#8f918f'},
+    {id:4,name:'Wood',color:'#a46f32'},
+    {id:5,name:'Water',color:'#3aa0e3'},
+    {id:6,name:'Sand',color:'#e2d59f'}
+  ];
+  let selectedBlock = 1;
 
-  // generate world storage: typed array of size W*H*D
-  function createWorld(w,d,h){
-    WORLD_W = w; WORLD_D = d; WORLD_H = h;
-    const world = new Uint8Array(WORLD_W * WORLD_H * WORLD_D);
-    // simple procedural hills
-    for(let x=0;x<WORLD_W;x++){
-      for(let z=0;z<WORLD_D;z++){
-        const wx = x - WORLD_W/2, wz = z - WORLD_D/2;
-        const height = Math.max(1, Math.floor((WORLD_H/3) + 3*Math.sin((wx)/6) + 2*Math.cos((wz)/7)));
-        for(let y=0;y<WORLD_H;y++){
-          let id = 0;
-          if(y < height-1) id = 2; // dirt
-          else if(y === height-1) id = 1; // grass
-          else id = 0;
-          world[index(x,y,z)] = id;
-        }
-      }
-    }
-    // make some sand near edges
-    for(let x=0;x<10;x++){
-      for(let z=0;z<10;z++){
-        world[index(x,0,z)] = 6;
-        world[index(WORLD_W-1-x,0,z)] = 6;
-      }
-    }
-    return world;
-  }
-  function index(x,y,z){ return x + z * WORLD_W + y * WORLD_W * WORLD_D; }
+  // generate world storage: typed array of size W*H*D
+  function createWorld(w,d,h){
+    WORLD_W = w; WORLD_D = d; WORLD_H = h;
+    const world = new Uint8Array(WORLD_W * WORLD_H * WORLD_D);
+    // simple procedural hills
+    for(let x=0;x<WORLD_W;x++){
+      for(let z=0;z<WORLD_D;z++){
+        const wx = x - WORLD_W/2, wz = z - WORLD_D/2;
+        const height = Math.max(1, Math.floor((WORLD_H/3) + 3*Math.sin((wx)/6) + 2*Math.cos((wz)/7)));
+        for(let y=0;y<WORLD_H;y++){
+          let id = 0;
+          if(y < height-1) id = 2; // dirt
+          else if(y === height-1) id = 1; // grass
+          else id = 0;
+          world[index(x,y,z)] = id;
+        }
+      }
+    }
+    // make some sand near edges
+    for(let x=0;x<10;x++){
+      for(let z=0;z<10;z++){
+        if(index(x,0,z) < world.length) world[index(x,0,z)] = 6;
+        if(index(WORLD_W-1-x,0,z) < world.length) world[index(WORLD_W-1-x,0,z)] = 6;
+      }
+    }
+    return world;
+  }
+  function index(x,y,z){ return x + z * WORLD_W + y * WORLD_W * WORLD_D; }
 
-  let world = createWorld(WORLD_W, WORLD_D, WORLD_H);
+  let world = createWorld(WORLD_W, WORLD_D, WORLD_H);
 
-  // Build palette UI
-  function buildPalette(){
-    paletteEl.innerHTML = '';
-    for(let i=1;i<=6;i++){
-      const b = BLOCKS[i];
-      const btn = document.createElement('div');
-      btn.className = 'blockBtn' + (selectedBlock===i? ' sel':'');
-      btn.title = `${i}: ${b.name}`;
-      btn.style.background = b.color;
-      btn.style.color = '#022';
-      btn.style.padding = '6px';
-      btn.style.minWidth = '56px';
-      btn.style.display = 'flex';
-      btn.style.alignItems = 'center';
-      btn.style.justifyContent = 'center';
-      btn.style.fontWeight = '700';
-      btn.innerText = b.name;
-      (()=>{
-        const id = i;
-        btn.onclick = ()=>{ selectedBlock = id; buildPalette(); };
-      })();
-      paletteEl.appendChild(btn);
-    }
-  }
-  buildPalette();
+  // Build palette UI
+  function buildPalette(){
+    paletteEl.innerHTML = '';
+    // Start from 1 to skip 'Air' block
+    for(let i=1;i<BLOCKS.length;i++){
+      const b = BLOCKS[i];
+      const btn = document.createElement('div');
+      btn.className = 'blockBtn' + (selectedBlock===i? ' sel':'');
+      btn.title = `${i}: ${b.name}`;
+      btn.style.background = b.color;
+      btn.style.color = '#022';
+      btn.style.padding = '6px';
+      btn.style.minWidth = '56px';
+      btn.style.display = 'flex';
+      btn.style.alignItems = 'center';
+      btn.style.justifyContent = 'center';
+      btn.style.fontWeight = '700';
+      btn.innerText = b.name;
+      (()=>{
+        const id = i;
+        btn.onclick = ()=>{ selectedBlock = id; buildPalette(); };
+      })();
+      paletteEl.appendChild(btn);
+    }
+  }
+  buildPalette();
 
-  // Coordinate conversions for isometric projection
-  // We draw cubes as stacked isometric tiles.
-  const tile = {w: 48, h: 24}; // base diamond tile (width, height)
-  function worldToScreen(x,y,z){
-    // simple isometric projection: x,z horizontal plane, y vertical
-    // center world around camera
-    const cx = (x - cam.x);
-    const cz = (z - cam.z);
-    const sx = (cx - cz) * (tile.w/2) * cam.zoom + canvas.width/2 / (devicePixelRatio||1);
-    const sy = (cx + cz) * (tile.h/2) * cam.zoom/1.0 - (y * tile.h) * cam.zoom + canvas.height/2 / (devicePixelRatio||1) - 60;
-    return {sx, sy};
-  }
+  // Coordinate conversions for isometric projection
+  const tile = {w: 48, h: 24}; // base diamond tile (width, height)
+  function worldToScreen(x,y,z){
+    // Use canvas dimensions divided by dpr for correct centering
+    const canvasW = canvas.width / (devicePixelRatio||1);
+    const canvasH = canvas.height / (devicePixelRatio||1);
+    
+    // simple isometric projection: x,z horizontal plane, y vertical
+    // center world around camera
+    const cx = (x - cam.x);
+    const cz = (z - cam.z);
+    const sx = (cx - cz) * (tile.w/2) * cam.zoom + canvasW/2;
+    const sy = (cx + cz) * (tile.h/2) * cam.zoom/1.0 - (y * tile.h) * cam.zoom + canvasH/2 - 60;
+    return {sx, sy};
+  }
 
-  // Draw single cube at world position
-  function drawCube(x,y,z, color){
-    const s = worldToScreen(x,y,z);
-    const w = tile.w * cam.zoom;
-    const h = tile.h * cam.zoom;
-    // top diamond
-    ctx.save();
-    ctx.translate(s.sx, s.sy);
-    // top
-    ctx.beginPath();
-    ctx.moveTo(0, -h/2);
-    ctx.lineTo(w/2, 0);
-    ctx.lineTo(0, h/2);
-    ctx.lineTo(-w/2, 0);
-    ctx.closePath();
-    ctx.fillStyle = shade(color, 1.0);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-    ctx.stroke();
+  // Draw single cube at world position
+  function drawCube(x,y,z, color){
+    const s = worldToScreen(x,y,z);
+    const w = tile.w * cam.zoom;
+    const h = tile.h * cam.zoom;
+    // Culling: skip if outside screen bounds (performance)
+    const padding = 50;
+    const canvasW = canvas.width / (devicePixelRatio||1);
+    const canvasH = canvas.height / (devicePixelRatio||1);
+    if(s.sx < -w/2 - padding || s.sx > canvasW + w/2 + padding || s.sy < -h - padding || s.sy > canvasH + h + padding) return;
 
-    // left face
-    ctx.beginPath();
-    ctx.moveTo(-w/2,0);
-    ctx.lineTo(0,h/2);
-    ctx.lineTo(0,h/2 + tile.h*cam.zoom);
-    ctx.lineTo(-w/2, tile.h*cam.zoom);
-    ctx.closePath();
-    ctx.fillStyle = shade(color, 0.85);
-    ctx.fill();
-    ctx.stroke();
+    // top diamond
+    ctx.save();
+    ctx.translate(s.sx, s.sy);
+    // top
+    ctx.beginPath();
+    ctx.moveTo(0, -h/2);
+    ctx.lineTo(w/2, 0);
+    ctx.lineTo(0, h/2);
+    ctx.lineTo(-w/2, 0);
+    ctx.closePath();
+    ctx.fillStyle = shade(color, 1.0);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+    ctx.stroke();
 
-    // right face
-    ctx.beginPath();
-    ctx.moveTo(w/2,0);
-    ctx.lineTo(0,h/2);
-    ctx.lineTo(0,h/2 + tile.h*cam.zoom);
-    ctx.lineTo(w/2, tile.h*cam.zoom);
-    ctx.closePath();
-    ctx.fillStyle = shade(color, 0.72);
-    ctx.fill();
-    ctx.stroke();
+    // left face
+    ctx.beginPath();
+    ctx.moveTo(-w/2,0);
+    ctx.lineTo(0,h/2);
+    ctx.lineTo(0,h/2 + tile.h*cam.zoom);
+    ctx.lineTo(-w/2, tile.h*cam.zoom);
+    ctx.closePath();
+    ctx.fillStyle = shade(color, 0.85);
+    ctx.fill();
+    ctx.stroke();
 
-    ctx.restore();
-  }
+    // right face
+    ctx.beginPath();
+    ctx.moveTo(w/2,0);
+    ctx.lineTo(0,h/2);
+    ctx.lineTo(0,h/2 + tile.h*cam.zoom);
+    ctx.lineTo(w/2, tile.h*cam.zoom);
+    ctx.closePath();
+    ctx.fillStyle = shade(color, 0.72);
+    ctx.fill();
+    ctx.stroke();
 
-  // helper: color shading (hex string)
-  function shade(hex, k){
-    if(!hex) return '#0000';
-    const c = hex.replace('#','');
-    const r = Math.max(0, Math.min(255, Math.floor(parseInt(c.substring(0,2),16) * k)));
-    const g = Math.max(0, Math.min(255, Math.floor(parseInt(c.substring(2,4),16) * k)));
-    const b = Math.max(0, Math.min(255, Math.floor(parseInt(c.substring(4,6),16) * k)));
-    return `rgb(${r},${g},${b})`;
-  }
+    ctx.restore();
+  }
 
-  // Main draw function — draw by slices (back to front): y from bottom to top, then x+z order
-  function draw(){
-    // clear
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    // sky / far ground shading
-    ctx.fillStyle = '#0b1220';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+  // helper: color shading (hex string)
+  function shade(hex, k){
+    if(!hex) return '#0000';
+    const c = hex.replace('#','');
+    const r = Math.max(0, Math.min(255, Math.floor(parseInt(c.substring(0,2),16) * k)));
+    const g = Math.max(0, Math.min(255, Math.floor(parseInt(c.substring(2,4),16) * k)));
+    const b = Math.max(0, Math.min(255, Math.floor(parseInt(c.substring(4,6),16) * k)));
+    return `rgb(${r},${g},${b})`;
+  }
 
-    // Draw a simple horizon and fog
-    ctx.fillStyle = '#87ceeb';
-    ctx.fillRect(0,0,canvas.width, canvas.height * 0.45);
+  // Main draw function
+  function draw(){
+    // clear
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    
+    // Sky/Horizon Background
+    ctx.fillStyle = '#0b1220';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#87ceeb';
+    ctx.fillRect(0,0,canvas.width, canvas.height * 0.45);
 
-    // choose drawing ranges for speed (render distance)
-    const dist = Math.max(WORLD_W, WORLD_D);
-    // iterate by layer: y from 0..H-1 to draw bottom up so higher blocks appear above
-    for(let y=0;y<WORLD_H;y++){
-      // for isometric depth, iterate by (x+z) sum to approximate correct depth
-      const maxSum = WORLD_W + WORLD_D;
-      for(let s=0; s<maxSum; s++){
-        for(let x=0;x<WORLD_W;x++){
-          const z = s - x;
-          if(z < 0 || z >= WORLD_D) continue;
-          const id = world[index(x,y,z)];
-          if(id === 0) continue;
-          const color = BLOCKS[id].color;
-          drawCube(x,y,z,color);
-        }
-      }
-    }
+    // iterate by layer: y from 0..H-1 to draw bottom up
+    for(let y=0;y<WORLD_H;y++){
+      // for isometric depth, iterate by (x+z) sum
+      const maxSum = WORLD_W + WORLD_D;
+      for(let s=0; s<maxSum; s++){
+        for(let x=0;x<WORLD_W;x++){
+          const z = s - x;
+          if(z < 0 || z >= WORLD_D) continue;
+          const id = world[index(x,y,z)];
+          if(id === 0) continue;
+          const color = BLOCKS[id].color;
+          drawCube(x,y,z,color);
+        }
+      }
+    }
 
-    // highlight hovered tile
-    if(inWorld(hover.tx, hover.ty, hover.tz)){
-      // draw translucent outline cube on top of block (or empty place)
-      drawHighlight(hover.tx, hover.ty, hover.tz);
-    }
+    // highlight hovered tile
+    if(inWorld(hover.tx, hover.ty, hover.tz)){
+      drawHighlight(hover.tx, hover.ty, hover.tz);
+    }
 
-    // HUD: selected block
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.fillRect(8,8,170,36);
-    ctx.fillStyle = '#fff';
-    ctx.font = '13px system-ui';
-    ctx.fillText('Selected: ' + BLOCKS[selectedBlock].name + ' (1-6)', 16, 28);
-  }
+    // HUD: selected block
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(8,8,170,36);
+    ctx.fillStyle = '#fff';
+    ctx.font = '13px system-ui';
+    ctx.fillText('Selected: ' + BLOCKS[selectedBlock].name + ' (1-6)', 16, 28);
+  }
 
-  function drawHighlight(x,y,z){
-    const pos = worldToScreen(x,y,z);
-    const w = tile.w * cam.zoom, h = tile.h * cam.zoom;
-    ctx.save();
-    ctx.translate(pos.sx, pos.sy);
-    ctx.beginPath();
-    ctx.moveTo(0, -h/2);
-    ctx.lineTo(w/2, 0);
-    ctx.lineTo(0, h/2);
-    ctx.lineTo(-w/2, 0);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.stroke();
-    ctx.restore();
-  }
+  function drawHighlight(x,y,z){
+    const pos = worldToScreen(x,y,z);
+    const w = tile.w * cam.zoom, h = tile.h * cam.zoom;
+    ctx.save();
+    ctx.translate(pos.sx, pos.sy);
+    ctx.beginPath();
+    ctx.moveTo(0, -h/2);
+    ctx.lineTo(w/2, 0);
+    ctx.lineTo(0, h/2);
+    ctx.lineTo(-w/2, 0);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+  }
 
-  function inWorld(x,y,z){
-    return x>=0 && z>=0 && x < WORLD_W && z < WORLD_D && y>=0 && y < WORLD_H;
-  }
+  function inWorld(x,y,z){
+    return x>=0 && z>=0 && x < WORLD_W && z < WORLD_D && y>=0 && y < WORLD_H;
+  }
 
-  // Input: dragging to pan
-  canvas.addEventListener('mousedown', (ev)=>{
-    canvas.focus();
-    if(ev.button === 0){
-      dragging = true;
-      lastMouse = {x: ev.clientX, y: ev.clientY};
-    }
-  });
-  window.addEventListener('mouseup', ()=>{ dragging = false; lastMouse = null; });
-  window.addEventListener('mousemove', (ev)=>{
-    if(dragging && lastMouse){
-      const dx = ev.clientX - lastMouse.x;
-      const dz = ev.clientY - lastMouse.y;
-      lastMouse = {x: ev.clientX, y: ev.clientY};
-      // translate camera in world coordinates (approx)
-      const factor = 0.08 / cam.zoom;
-      cam.x -= dx * factor;
-      cam.z += dz * factor;
-      draw();
-    } else {
-      // update hover from mouse position
-      const rect = canvas.getBoundingClientRect();
-      const mx = (ev.clientX - rect.left);
-      const my = (ev.clientY - rect.top);
-      updateHoverFromScreen(mx,my);
-    }
-  });
+  // Input: dragging to pan
+  canvas.addEventListener('mousedown', (ev)=>{
+    canvas.focus();
+    if(ev.button === 0){
+      // Only start dragging if Shift is held (to separate panning from block placement)
+      if(ev.shiftKey || !getHoverTileFromScreen(ev.clientX - canvas.getBoundingClientRect().left, ev.clientY - canvas.getBoundingClientRect().top)){
+        dragging = true;
+      }
+      lastMouse = {x: ev.clientX, y: ev.clientY};
+    }
+  });
+  window.addEventListener('mouseup', ()=>{ dragging = false; lastMouse = null; });
+  window.addEventListener('mousemove', (ev)=>{
+    if(dragging && lastMouse){
+      const dx = ev.clientX - lastMouse.x;
+      const dy = ev.clientY - lastMouse.y;
+      lastMouse = {x: ev.clientX, y: ev.clientY};
+      // FIX: Inverted Z component for intuitive isometric drag (mouse down = pan up-right)
+      const factor = 0.08 / cam.zoom;
+      cam.x -= dx * factor;
+      cam.z -= dy * factor; // Changed from += to -=
+      draw();
+    } else {
+      // update hover from mouse position
+      const rect = canvas.getBoundingClientRect();
+      const mx = (ev.clientX - rect.left);
+      const my = (ev.clientY - rect.top);
+      updateHoverFromScreen(mx,my);
+    }
+  });
 
-  // Mouse wheel to zoom
-  canvas.addEventListener('wheel', (ev)=>{
-    ev.preventDefault();
-    cam.zoom *= (ev.deltaY > 0 ? 0.95 : 1.05);
-    cam.zoom = Math.max(0.4, Math.min(2.5, cam.zoom));
-    draw();
-  }, {passive:false});
+  // Mouse wheel to zoom
+  canvas.addEventListener('wheel', (ev)=>{
+    ev.preventDefault();
+    cam.zoom *= (ev.deltaY > 0 ? 0.95 : 1.05);
+    cam.zoom = Math.max(0.4, Math.min(2.5, cam.zoom));
+    draw();
+  }, {passive:false});
 
-  // Right click to remove block at hover; left click to place
-  canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
-  canvas.addEventListener('click', (ev)=>{
-    const rect = canvas.getBoundingClientRect();
-    const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
-    const h = getHoverTileFromScreen(mx,my);
-    if(!h) return;
-    // left click places block at hover position at same y
-    if(ev.button === 0){
-      const {x,y,z} = h;
-      if(inWorld(x,y,z)) {
-        world[index(x,y,z)] = selectedBlock;
-        draw();
-      }
-    }
-  });
-  canvas.addEventListener('auxclick', (ev)=>{ /* ignore */ });
-  window.addEventListener('mouseup', (ev)=>{
-    if(ev.button === 2){
-      // right mouse remove
-      const rect = canvas.getBoundingClientRect();
-      const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
-      const h = getHoverTileFromScreen(mx,my);
-      if(!h) return;
-      const {x,y,z} = h;
-      if(inWorld(x,y,z)){
-        world[index(x,y,z)] = 0;
-        draw();
-      }
-    }
-  });
+  // Right click to remove block at hover; left click to place
+  canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+  canvas.addEventListener('click', (ev)=>{
+    if(ev.shiftKey || dragging) return; // Ignore if panning or shift is held
+    
+    const rect = canvas.getBoundingClientRect();
+    const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+    const h = getHoverTileFromScreen(mx,my);
+    if(!h) return;
+    
+    // left click places block at hover position (replaces existing or places in air)
+    if(ev.button === 0){
+      const {x,y,z} = h;
+      if(inWorld(x,y,z)) {
+        world[index(x,y,z)] = selectedBlock;
+        draw();
+      }
+    }
+  });
+  
+  // Use 'mouseup' for right-click removal
+  window.addEventListener('mouseup', (ev)=>{
+    if(ev.button === 2){
+      // right mouse remove
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+      const h = getHoverTileFromScreen(mx,my);
+      if(!h) return;
+      const {x,y,z} = h;
+      if(inWorld(x,y,z)){
+        world[index(x,y,z)] = 0; // Set to Air (0)
+        draw();
+      }
+    }
+  });
 
-  // Keyboard: number keys for blocks, S save, L load
-  window.addEventListener('keydown', (e)=>{
-    if(e.key >= '1' && e.key <= '6'){
-      selectedBlock = parseInt(e.key);
-      buildPalette();
-      draw();
-    }
-    if(e.key === 's' || e.key === 'S'){ saveWorld(); }
-    if(e.key === 'l' || e.key === 'L'){ loadWorld(); }
-    if(e.key === '='){ cam.zoom = Math.min(cam.zoom * 1.1, 2.5); draw(); }
-    if(e.key === '-'){ cam.zoom = Math.max(cam.zoom * 0.9, 0.4); draw(); }
-  });
+  // Keyboard: number keys for blocks, S save, L load
+  window.addEventListener('keydown', (e)=>{
+    if(document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') return;
+    
+    if(e.key >= '1' && e.key <= '6'){
+      selectedBlock = parseInt(e.key);
+      buildPalette();
+      draw();
+    }
+    if(e.key === 's' || e.key === 'S'){ saveWorld(); }
+    if(e.key === 'l' || e.key === 'L'){ loadWorld(); }
+    if(e.key === '='){ cam.zoom = Math.min(cam.zoom * 1.1, 2.5); draw(); }
+    if(e.key === '-'){ cam.zoom = Math.max(cam.zoom * 0.9, 0.4); draw(); }
+  });
 
-  // Functions to map screen position to world tile under cursor.
-  // We'll raycast from screen into isometric stack by testing many possible tiles and picking the topmost visible one.
-  function updateHoverFromScreen(mx,my){
-    const hit = getHoverTileFromScreen(mx,my);
-    if(hit){
-      hover.tx = hit.x; hover.ty = hit.y; hover.tz = hit.z;
-    } else {
-      hover.tx = hover.ty = hover.tz = -1;
-    }
-    draw();
-  }
+  // Functions to map screen position to world tile under cursor.
+  function updateHoverFromScreen(mx,my){
+    const hit = getHoverTileFromScreen(mx,my);
+    if(hit){
+      hover.tx = hit.x; hover.ty = hit.y; hover.tz = hit.z;
+    } else {
+      hover.tx = hover.ty = hover.tz = -1;
+    }
+    draw();
+  }
 
-  function getHoverTileFromScreen(mx,my){
-    // For performance: test z,x in a bounding window near camera center
-    // We'll find the highest y (topmost) whose projected diamond contains the screen point.
-    const px = mx, py = my;
-    // search all tiles — WORLD up to 64^2 * 24 is fine for chosen sizes; if it's slow we will reduce iterations
-    // We'll start from top Y down so we get top visible tile first.
-    for(let y = WORLD_H - 1; y >= 0; y--){
-      // iterate diagonally for correct depth ordering (not strictly necessary)
-      for(let s = 0; s < WORLD_W + WORLD_D; s++){
-        for(let x = 0; x < WORLD_W; x++){
-          const z = s - x;
-          if(z < 0 || z >= WORLD_D) continue;
-          // if empty skip but still allow placing on empty spaces just above blocks
-          if(world[index(x,y,z)] === 0 && y > 0 && world[index(x,y-1,z)] === 0) continue;
-          const p = worldToScreen(x,y,z);
-          // test if point lies in the top diamond area expanded slightly
-          if(pointInDiamond(px, py, p.sx, p.sy, tile.w*cam.zoom, tile.h*cam.zoom)){
-            return {x,y,z};
-          }
-        }
-      }
-    }
-    // if nothing found, pick ground-level tile under mouse projection (y=0)
-    for(let s = 0; s < WORLD_W + WORLD_D; s++){
-      for(let x = 0; x < WORLD_W; x++){
-        const z = s - x; if(z < 0 || z >= WORLD_D) continue;
-        const p = worldToScreen(x,0,z);
-        if(pointInDiamond(px, py, p.sx, p.sy, tile.w*cam.zoom, tile.h*cam.zoom)) return {x: x, y: 0, z: z};
-      }
-    }
-    return null;
-  }
+  function getHoverTileFromScreen(mx,my){
+    const px = mx, py = my;
+    
+    // Search from top Y down so we get top visible tile first.
+    for(let y = WORLD_H - 1; y >= 0; y--){
+      for(let s = 0; s < WORLD_W + WORLD_D; s++){
+        for(let x = 0; x < WORLD_W; x++){
+          const z = s - x;
+          if(z < 0 || z >= WORLD_D) continue;
+          
+          // Optimization: skip if air and air below (unless it's the very bottom layer y=0)
+          if(world[index(x,y,z)] === 0 && y > 0 && world[index(x,y-1,z)] === 0) continue;
+          
+          const p = worldToScreen(x,y,z);
+          // test if point lies in the top diamond area
+          if(pointInDiamond(px, py, p.sx, p.sy, tile.w*cam.zoom, tile.h*cam.zoom)){
+            return {x,y,z};
+          }
+        }
+      }
+    }
+    
+    // Fallback: if nothing solid/placeable is found, pick ground-level tile under mouse projection (y=0)
+    for(let s = 0; s < WORLD_W + WORLD_D; s++){
+      for(let x = 0; x < WORLD_W; x++){
+        const z = s - x; if(z < 0 || z >= WORLD_D) continue;
+        const p = worldToScreen(x,0,z);
+        if(pointInDiamond(px, py, p.sx, p.sy, tile.w*cam.zoom, tile.h*cam.zoom)) return {x: x, y: 0, z: z};
+      }
+    }
+    return null;
+  }
 
-  function pointInDiamond(px,py,cx,cy,w,h){
-    // Transform to diamond coordinates
-    const dx = Math.abs(px - cx);
-    const dy = Math.abs(py - cy);
-    // Diamond equation: dx/(w/2) + dy/(h/2) <= 1
-    return (dx / (w/2) + dy / (h/2)) <= 1.05; // small tolerance
-  }
+  function pointInDiamond(px,py,cx,cy,w,h){
+    // Transform to diamond coordinates
+    const dx = Math.abs(px - cx);
+    const dy = Math.abs(py - cy);
+    // Diamond equation: dx/(w/2) + dy/(h/2) <= 1
+    return (dx / (w/2) + dy / (h/2)) <= 1.05; // small tolerance
+  }
 
-  // Save/load/export/import
-  function saveWorld(){
-    try{
-      const data = {W: WORLD_W, D: WORLD_D, H: WORLD_H, arr: Array.from(world)};
-      localStorage.setItem('mini_iso_save', JSON.stringify(data));
-      alert('Saved to localStorage.');
-    } catch(e){
-      alert('Save failed: ' + e.message);
-    }
-  }
-  function loadWorld(){
-    try{
-      const s = localStorage.getItem('mini_iso_save');
-      if(!s){ alert('No save found'); return; }
-      const obj = JSON.parse(s);
-      WORLD_W = obj.W; WORLD_D = obj.D; WORLD_H = obj.H; world = Uint8Array.from(obj.arr);
-      document.getElementById('sizeSelect').value = WORLD_W.toString();
-      document.getElementById('heightSelect').value = WORLD_H.toString();
-      draw();
-      alert('Loaded.');
-    } catch(e){ alert('Load failed: ' + e.message); }
-  }
-  document.getElementById('saveBtn').onclick = saveWorld;
-  document.getElementById('loadBtn').onclick = loadWorld;
-  document.getElementById('exportBtn').onclick = ()=>{
-    const data = {W: WORLD_W, D: WORLD_D, H: WORLD_H, arr: Array.from(world)};
-    document.getElementById('importExport').value = JSON.stringify(data);
-  };
-  document.getElementById('importBtn').onclick = ()=>{
-    try{
-      const s = document.getElementById('importExport').value;
-      if(!s) return alert('Paste exported JSON here');
-      const obj = JSON.parse(s);
-      WORLD_W = obj.W; WORLD_D = obj.D; WORLD_H = obj.H; world = Uint8Array.from(obj.arr);
-      document.getElementById('sizeSelect').value = WORLD_W.toString();
-      document.getElementById('heightSelect').value = WORLD_H.toString();
-      draw();
-      alert('Imported world.');
-    } catch(e){ alert('Import failed: '+e.message); }
-  };
+  // Save/load/export/import
+  function saveWorld(){
+    try{
+      const data = {W: WORLD_W, D: WORLD_D, H: WORLD_H, cam, arr: Array.from(world)};
+      localStorage.setItem('mini_iso_save', JSON.stringify(data));
+      alert('Saved to localStorage.');
+    } catch(e){
+      alert('Save failed: ' + e.message);
+    }
+  }
+  function loadWorld(){
+    try{
+      const s = localStorage.getItem('mini_iso_save');
+      if(!s){ alert('No save found'); return; }
+      const obj = JSON.parse(s);
+      WORLD_W = obj.W; WORLD_D = obj.D; WORLD_H = obj.H; world = Uint8Array.from(obj.arr);
+      if(obj.cam) cam = obj.cam; // load camera position
+      document.getElementById('sizeSelect').value = WORLD_W.toString();
+      document.getElementById('heightSelect').value = WORLD_H.toString();
+      draw();
+      alert('Loaded.');
+    } catch(e){ alert('Load failed: ' + e.message); }
+  }
+  document.getElementById('saveBtn').onclick = saveWorld;
+  document.getElementById('loadBtn').onclick = loadWorld;
+  document.getElementById('exportBtn').onclick = ()=>{
+    const data = {W: WORLD_W, D: WORLD_D, H: WORLD_H, arr: Array.from(world)};
+    document.getElementById('importExport').value = JSON.stringify(data);
+  };
+  document.getElementById('importBtn').onclick = ()=>{
+    try{
+      const s = document.getElementById('importExport').value;
+      if(!s) return alert('Paste exported JSON here');
+      const obj = JSON.parse(s);
+      WORLD_W = obj.W; WORLD_D = obj.D; WORLD_H = obj.H; world = Uint8Array.from(obj.arr);
+      document.getElementById('sizeSelect').value = WORLD_W.toString();
+      document.getElementById('heightSelect').value = WORLD_H.toString();
+      draw();
+      alert('Imported world.');
+    } catch(e){ alert('Import failed: '+e.message); }
+  };
 
-  // Change world size UI
-  document.getElementById('sizeSelect').addEventListener('change', (e)=>{
-    const val = parseInt(e.target.value);
-    world = createWorld(val, val, WORLD_H);
-    draw();
-  });
-  document.getElementById('heightSelect').addEventListener('change', (e)=>{
-    const val = parseInt(e.target.value);
-    world = createWorld(WORLD_W, WORLD_D, val);
-    draw();
-  });
+  // Change world size UI (calling createWorld resets the map to procedural generation)
+  document.getElementById('sizeSelect').addEventListener('change', (e)=>{
+    const val = parseInt(e.target.value);
+    world = createWorld(val, val, WORLD_H);
+    cam.x = val/2; // Re-center camera
+    cam.z = val/2;
+    draw();
+  });
+  document.getElementById('heightSelect').addEventListener('change', (e)=>{
+    const val = parseInt(e.target.value);
+    world = createWorld(WORLD_W, WORLD_D, val);
+    draw();
+  });
 
-  // utilities
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  // initial draw
+  draw();
 
-  // initial draw
-  draw();
+  // expose some debugging on window for quick fixes
+  window._mini_iso = {
+    world, rebuild: ()=>{ world = createWorld(WORLD_W, WORLD_D, WORLD_H); draw(); }
+  };
 
-  // expose some debugging on window for quick fixes
-  window._mini_iso = {
-    world, rebuild: ()=>{ world = createWorld(WORLD_W, WORLD_D, WORLD_H); draw(); }
-  };
-
-  // ensure canvas gets keyboard focus for shortcuts
-  canvas.addEventListener('click', ()=> canvas.focus());
+  // ensure canvas gets keyboard focus for shortcuts
+  canvas.addEventListener('click', ()=> canvas.focus());
 })();
 </script>
 </body>
